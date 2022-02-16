@@ -5,6 +5,7 @@ _targets/
 
 #All output
 */out/*
+!2_process/out/GFv1_NHDv2_xwalk.csv
 */tmp/*
 
 #R files
