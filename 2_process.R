@@ -18,8 +18,8 @@ p2_targets_list <- list(
   
   # Save GFv1-NHDv2 xwalk table 
   tar_target(
-    p2_prms_nhdv2_xwalk_rds,
-    write_to_rds(p2_prms_nhdv2_xwalk,"2_process/out/GFv1_NHDv2_xwalk.rds"),
+    p2_prms_nhdv2_xwalk_csv,
+    write_to_csv(p2_prms_nhdv2_xwalk,"2_process/out/GFv1_NHDv2_xwalk.csv"),
     format = "file"
   ),
   
