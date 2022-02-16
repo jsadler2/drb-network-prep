@@ -1,4 +1,5 @@
 source("1_fetch/src/get_gf.R")
+source("1_fetch/src/get_nhdplusv2.R")
 
 p1_targets_list <- list(
   
@@ -46,6 +47,12 @@ p1_targets_list <- list(
         # fix geometry issues by defining a zero-width buffer around the polylines
         sf::st_buffer(.,0)
     }
+  ),
+  
+  # Download NHDPlusV2 flowlines for the DRB
+  tar_target(
+    p1_nhdv2reaches_sf,
+    get_nhdv2_flowlines(drb_huc8s)
   )
   
 )
