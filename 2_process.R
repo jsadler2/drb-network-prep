@@ -2,6 +2,7 @@ source("2_process/src/pair_nhd_reaches.R")
 source("2_process/src/pair_nhd_catchments.R")
 source("2_process/src/create_GFv1_NHDv2_xwalk.R")
 source("2_process/src/write_data.R")
+source("2_process/src/write_ind_files.R")
 
 p2_targets_list <- list(
   
@@ -19,6 +20,14 @@ p2_targets_list <- list(
   tar_target(
     p2_prms_nhdv2_xwalk_rds,
     write_to_rds(p2_prms_nhdv2_xwalk,"2_process/out/GFv1_NHDv2_xwalk.rds"),
+    format = "file"
+  ),
+  
+  # Create and save indicator file
+  tar_target(
+    p2_data_summary_csv,
+    write_ind_files("2_process/log/GFv1_data_summary.csv",
+                    target_names = c("p1_GFv1_reaches_sf","p1_GFv1_catchments_sf","p1_nhdv2reaches_sf","p2_prms_nhdv2_xwalk","p2_prms_nhdv2_xwalk_rds")),
     format = "file"
   )
   
