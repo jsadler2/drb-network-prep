@@ -1,3 +1,4 @@
+source("1_fetch/src/get_gf.R")
 
 p1_targets_list <- list(
   
@@ -25,7 +26,28 @@ p1_targets_list <- list(
   tar_target(
     p1_GFv1_reaches_sf,
     sf::st_read(dsn = unique(dirname(p1_GFv1_reaches_shp)), layer = "study_stream_reaches", quiet=TRUE)
+  ),
+  
+  # Download PRMS catchments for region 02
+  # from ScienceBase: https://www.sciencebase.gov/catalog/item/5362b683e4b0c409c6289bf6
+  tar_target(
+    p1_GFv1_catchments_shp,
+    get_gf(out_dir = "1_fetch/out/", sb_id = '5362b683e4b0c409c6289bf6', sb_name = gf_data_select),
+    format = "file"
+  ),
+  
+  # Read PRMS catchment shapefile into sf object and filter to DRB
+  tar_target(
+    p1_GFv1_catchments_sf,
+    {
+      sf::st_read(dsn = p1_GFv1_catchments_shp,layer="nhru", quiet=TRUE) %>%
+        filter(hru_segment %in% p1_GFv1_reaches_sf$subsegseg) %>%
+        suppressWarnings() %>%
+        # fix geometry issues by defining a zero-width buffer around the polylines
+        sf::st_buffer(.,0)
+    }
   )
   
 )
+
   
