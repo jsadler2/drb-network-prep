@@ -29,13 +29,14 @@ p2_targets_list <- list(
     write_ind_files("2_process/log/GFv1_data_summary.csv",
                     target_names = c("p1_GFv1_reaches_sf","p1_GFv1_catchments_sf",
                                      "p1_nhdv2reaches_sf","p2_prms_nhdv2_xwalk","p2_prms_nhdv2_xwalk_rds")),
-    format = "file"
-  ),
+    cue = tar_cue(mode = "always"),
+    format = "file"),
   
   # Create and save sf session info
   tar_target(
     p2_sf_version_csv,
     write_session_info("2_process/log/sf_version_info.csv"),
+    cue = tar_cue(mode = "always"),
     format = "file"
   )
   
