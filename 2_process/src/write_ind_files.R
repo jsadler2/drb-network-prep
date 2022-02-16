@@ -23,10 +23,14 @@ write_session_info <- function(fileout){
   # save sf package version
   sf_version_info <- data.frame(extSoft = "sf",version = as.character(packageVersion("sf")))
   
+  # save nhdplusTools package version
+  nhdtools_version_info <- data.frame(extSoft = "nhdplusTools",version = as.character(packageVersion("nhdplusTools")))
+  
   # save sf external dependency versions
   extSoft_version_info <- sf::sf_extSoftVersion() %>% 
     data.frame(extSoft = names(.),version = .) %>%
-    bind_rows(.,sf_version_info)
+    bind_rows(.,sf_version_info) %>%
+    bind_rows(.,nhdtools_version_info)
   
   # Save session info table
   write_to_csv(extSoft_version_info,fileout)
@@ -34,3 +38,4 @@ write_session_info <- function(fileout){
   return(fileout)
 
 }
+
