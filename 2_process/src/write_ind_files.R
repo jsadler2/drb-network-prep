@@ -1,9 +1,11 @@
-write_ind_files <- function(fileout,target_names) {
+write_ind_files <- function(fileout,target_names,force_dep) {
   #' 
   #' @description Function to save indicator files to track data changes over time
   #'
   #' @param fileout a character string that indicates the name of the file to be saved, including path and file extension 
   #' @param target_names a character string or vector of strings containing the target names of interest
+  #' @param force_dep name of an upstream target; force_dep does not do anything in the function and so
+  #' is only acting as a placeholder to force dependencies when building the metadata table
   #'
   #' @value Returns a csv file containing the target metadata
   

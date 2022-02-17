@@ -24,19 +24,20 @@ p2_targets_list <- list(
   ),
   
   # Create and save indicator file
+  # argument force_dep must contain name of an upstream target to force dependencies
+  # and build this target when a log file already exists
   tar_target(
     p2_data_summary_csv,
     write_ind_files("2_process/log/GFv1_data_summary.csv",
-                    target_names = c("p1_GFv1_reaches_sf","p1_GFv1_catchments_sf",
-                                     "p1_nhdv2reaches_sf","p2_prms_nhdv2_xwalk","p2_prms_nhdv2_xwalk_rds")),
-    cue = tar_cue(mode = "always"),
+                    force_dep = p2_prms_nhdv2_xwalk_csv,
+                    target_names = c("p1_GFv1_reaches_sf","p1_GFv1_catchments_sf","p1_nhdv2reaches_sf",
+                                     "p2_prms_nhdv2_xwalk","p2_prms_nhdv2_xwalk_csv")),
     format = "file"),
   
   # Create and save sf session info
   tar_target(
     p2_sf_version_csv,
     write_session_info("2_process/log/sf_version_info.csv"),
-    cue = tar_cue(mode = "always"),
     format = "file"
   )
   
