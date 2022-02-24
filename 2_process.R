@@ -23,6 +23,15 @@ p2_targets_list <- list(
     format = "file"
   ),
   
+  # Reshape GFv1-NHDv2 xwalk table to return all COMIDs that drain to each PRMS segment
+  tar_target(
+    p2_drb_comids_all_tribs, 
+    p2_prms_nhdv2_xwalk %>%
+      select(PRMS_segid, comid_cat) %>% 
+      tidyr::separate_rows(comid_cat,sep=";") %>% 
+      rename(COMID = comid_cat)
+  ),
+  
   # Create and save indicator file
   # argument force_dep must contain name of an upstream target to force dependencies
   # and build this target when a log file already exists
