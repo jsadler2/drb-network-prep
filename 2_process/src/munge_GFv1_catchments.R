@@ -17,7 +17,7 @@ find_intersecting_hru <- function(prms_line,prms_hrus){
   # Calculate the length of prms_line and add as an attribute
   prms_line_proj$length = sf::st_length(prms_line_proj$geometry)
   
-  # Find which the intersections between HRU polygons and prms_line
+  # Return the intersection between prms_line and HRU polygons 
   # suppress warnings that "attribute variables are assumed to be spatially constant
   # throughout all geometries"
   intsct_hrus <- sf::st_intersection(prms_line_proj,prms_hrus_proj) %>%
@@ -26,7 +26,7 @@ find_intersecting_hru <- function(prms_line,prms_hrus){
   # Calculate percent of overlap between each HRU and prms_line
   intsct_hrus$length_percent = 100 * (sf::st_length(intsct_hrus)/intsct_hrus$length)
   
-  # Return attribute `hru_segment` for the HRU with greatest overlap with prms_line
+  # Return attribute `hru_segment` for the HRU that has the greatest overlap with prms_line
   hru_segment <- intsct_hrus$hru_segment[which.max(intsct_hrus$length_percent)]
   
   return(hru_segment)
@@ -47,11 +47,13 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
   #' segs_w_comids must contain variables PRMS_segid and COMID
   #' 
   
+  # Subset segs_w_comids to only include the PRMS segment of interest
   nhd_cats <- segs_w_comids %>%
     filter(PRMS_segid == prms_line$subsegid)
   
+  # Use nhdplusTools to retrieve the catchment polygons for COMIDs of interest
   nhd_cats_sf <- nhdplusTools::get_nhdplus(comid = c(nhd_cats$COMID),realization = "catchment",t_srs = 5070) %>%
-    # dissolved boundaries between individual NHDv2 catchments
+    # dissolve boundaries between individual NHDv2 catchments
     st_union() %>%
     # convert back to sf data.frame object and add the segment ID
     st_as_sf() %>%
@@ -114,6 +116,9 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,crs_out = 4
     
     prms_line <- prms_hrus_filled[i,]
     
+    # If PRMS segment is one of the segments that require special handling, 
+    # retrieve NHDPlusV2 catchments and use those as the catchment boundary.
+    # Else, represent the catchment boundaries using intersecting HRU polygon.
     if(prms_line$subsegid %in% segs_split){
       cat <- prms_splitsegs %>%
         filter(PRMS_segid == prms_line$subsegid) %>%
