@@ -41,6 +41,18 @@ p2_targets_list <- list(
     munge_GFv1_catchments(p1_GFv1_reaches_sf,p1_GFv1_catchments_sf,p2_drb_comids_all_tribs,crs_out = 4326)
   ),
   
+  # Save processed GFv1 catchments as a geopackage
+  tar_target(
+    p2_GFv1_catchments_edited_gpkg,
+    st_write(p2_GFv1_catchments_edited_sf, 
+             dsn = "2_process/out/GFv1_catchments_edited.gpkg", 
+             layer = "GFv1_catchments_edited", 
+             driver = "gpkg",
+             quiet = TRUE,
+             # overwrite layer if already exists
+             append = FALSE)
+  ),
+  
   # Create and save indicator file
   # argument force_dep must contain name of an upstream target to force dependencies
   # and build this target when a log file already exists
