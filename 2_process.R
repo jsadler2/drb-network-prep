@@ -1,6 +1,7 @@
 source("2_process/src/pair_nhd_reaches.R")
 source("2_process/src/pair_nhd_catchments.R")
 source("2_process/src/create_GFv1_NHDv2_xwalk.R")
+source("2_process/src/munge_GFv1_catchments.R")
 source("2_process/src/write_data.R")
 source("2_process/src/write_ind_files.R")
 
@@ -30,6 +31,14 @@ p2_targets_list <- list(
       select(PRMS_segid, comid_cat) %>% 
       tidyr::separate_rows(comid_cat,sep=";") %>% 
       rename(COMID = comid_cat)
+  ),
+  
+  # Process catchments so that every PRMS segment has >= 1 corresponding HRU; In addition,
+  # adjust catchments for 3 segments that were split in `delaware-model-prep` pipeline
+  # https://github.com/USGS-R/delaware-model-prep
+  tar_target(
+    p2_GFv1_catchments_edited_sf,
+    munge_GFv1_catchments(p1_GFv1_reaches_sf,p1_GFv1_catchments_sf,p2_drb_comids_all_tribs,crs_out = 4326)
   ),
   
   # Create and save indicator file
