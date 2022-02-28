@@ -54,9 +54,9 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
   # Use nhdplusTools to retrieve the catchment polygons for COMIDs of interest
   nhd_cats_sf <- nhdplusTools::get_nhdplus(comid = c(nhd_cats$COMID),realization = "catchment",t_srs = 5070) %>%
     # dissolve boundaries between individual NHDv2 catchments
-    st_union() %>%
+    sf::st_union() %>%
     # convert back to sf data.frame object and add the segment ID
-    st_as_sf() %>%
+    sf::st_as_sf() %>%
     mutate(PRMS_segid = unique(prms_line$subsegid)) %>%
     rename(geometry = x)
   
@@ -125,14 +125,14 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,crs_out = 4
         mutate(hru_segment = prms_line$subsegid,
                hru_id = NA) %>%
         select(PRMS_segid,hru_segment,hru_id,geometry) %>%
-        st_transform(.,crs_out)
+        sf::st_transform(.,crs_out)
     } else {
       cat <- prms_hrus %>%
         filter(hru_segment == prms_line$hru_segment) %>%
         mutate(PRMS_segid = prms_line$subsegid) %>%
         select(PRMS_segid,hru_segment,hru_id) %>%
         rename(geometry = Shape) %>%
-        st_transform(.,crs_out)
+        sf::st_transform(.,crs_out)
     }
     
     catchments_ls[[i]] <- cat
