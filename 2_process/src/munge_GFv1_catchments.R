@@ -88,7 +88,9 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
     split(.,.$subsegid) %>%
     # For each PRMS segment, find the HRU with the greatest overlap and add as an attribute
     lapply(.,function(x){
-      x$hru_segment <- find_intersecting_hru(x,prms_hrus)
+      x$hru_segment <- ifelse(x$subsegseg %in% prms_hrus$hru_segment,
+                              x$subsegseg,
+                              find_intersecting_hru(x,prms_hrus))
       return(x)
     }) %>%
     # Reformat list into a data frame with one row per PRMS segment
