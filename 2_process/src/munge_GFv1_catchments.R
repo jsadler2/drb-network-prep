@@ -66,19 +66,20 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
 
 
 
-munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,crs_out = 4326){
+munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,crs_out = 4326){
   #' 
   #' @description This function munges the PRMS HRU's (~ the PRMS catchments) so that every
   #' PRMS segment in the Delaware River Basin has at least one corresponding HRU and so that 
-  #' the catchment boundaries are adjusted for 3 NHGFv1 segments that were split in the 
-  #' `delaware-model-prep` pipeline: segid's 3_1, 3_2, 8_1, 8_2, 51_1, 51_2 
-  #' (https://github.com/USGS-R/delaware-model-prep) 
+  #' the catchment boundaries are adjusted for NHGFv1 segments that were split in the 
+  #' `delaware-model-prep` pipeline (https://github.com/USGS-R/delaware-model-prep) 
   #' 
   #' @param prms_lines sf object containing the PRMS river segments for the DRB
   #' prms_lines must contain variables subsegid and geometry
   #' @param segs_w_comids data frame containing the PRMS segment ids and the contributing COMID's
   #' segs_w_comids must contain variables PRMS_segid and COMID
   #' @param prms_hrus sf (multi)polygon containing the HRU's from the NHGFv1
+  #' @param segs_split character vector indicating the PRMS_segid of the segments that were split in 
+  #' the delaware-model-prep pipeline
   #' @param crs_out numeric EPSG code indicating desired crs. Defaults to EPSG: 4326, WGS84.
   #
   
@@ -96,8 +97,6 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,crs_out = 4
     bind_rows()
   
   # 2. For select segments, redefine the catchment polygon using the contributing NHDv2 catchments
-  segs_split <- c("3_1","3_2","8_1","8_2","51_1","51_2")
-  
   prms_splitsegs <- prms_hrus_filled %>%
     # Filter PRMS segments to only include select segments that require special handling
     filter(subsegid %in% segs_split) %>%
