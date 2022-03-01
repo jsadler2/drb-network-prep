@@ -13,18 +13,16 @@ find_intersecting_hru <- function(prms_line,prms_hrus){
   # using Albers Equal Area Conic CONUS
   prms_line_proj <- sf::st_transform(prms_line, 5070)
   prms_hrus_proj <- sf::st_transform(prms_hrus, 5070)
-  
-  # Calculate the length of prms_line and add as an attribute
-  prms_line_proj$length = sf::st_length(prms_line_proj$geometry)
-  
+
   # Return the intersection between prms_line and HRU polygons 
   # suppress warnings that "attribute variables are assumed to be spatially constant
   # throughout all geometries"
   intsct_hrus <- sf::st_intersection(prms_line_proj,prms_hrus_proj) %>%
     suppressWarnings()
   
-  # Calculate percent of overlap between each HRU and prms_line
-  intsct_hrus$length_percent = 100 * (sf::st_length(intsct_hrus)/intsct_hrus$length)
+  # Calculate percent of overlap between each HRU and prms_line, where attribute
+  # `subseglen` is the length of the segment in meters
+  intsct_hrus$length_percent = 100 * (sf::st_length(intsct_hrus)/intsct_hrus$subseglen)
   
   # Return attribute `hru_segment` for the HRU that has the greatest overlap with prms_line
   hru_segment <- intsct_hrus$hru_segment[which.max(intsct_hrus$length_percent)]
