@@ -44,13 +44,14 @@ p2_targets_list <- list(
   # Save processed GFv1 catchments as a geopackage
   tar_target(
     p2_GFv1_catchments_edited_gpkg,
-    sf::st_write(p2_GFv1_catchments_edited_sf, 
+    write_sf(p2_GFv1_catchments_edited_sf,
              dsn = "2_process/out/GFv1_catchments_edited.gpkg", 
              layer = "GFv1_catchments_edited", 
              driver = "gpkg",
              quiet = TRUE,
              # overwrite layer if already exists
-             append = FALSE)
+             append = FALSE),
+    format = "file"
   ),
   
   # Create and save indicator file
