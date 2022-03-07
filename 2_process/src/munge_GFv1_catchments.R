@@ -50,7 +50,13 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
     filter(PRMS_segid == prms_line$subsegid)
   
   # Use nhdplusTools to retrieve the catchment polygons for COMIDs of interest
-  nhd_cats_sf <- nhdplusTools::get_nhdplus(comid = c(nhd_cats$COMID),realization = "catchment",t_srs = 5070) %>%
+  nhd_cats_sf <- nhdplusTools::get_nhdplus(comid = c(nhd_cats$COMID),realization = "catchment",t_srs = 5070) 
+  
+  message(sprintf("Gathering NHDv2 catchments to create HRUs for subsegid %s; %s COMIDs expected and %s COMIDs returned",
+                  unique(prms_line$subsegid),length(nhd_cats$COMID),length(nhd_cats_sf$featureid)))
+  
+  # Format the catchment polygons
+  nhd_cats_sf_out <- nhd_cats_sf %>%
     # dissolve boundaries between individual NHDv2 catchments
     sf::st_union() %>%
     # convert back to sf data.frame object and add the segment ID
@@ -58,7 +64,7 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
     mutate(PRMS_segid = unique(prms_line$subsegid)) %>%
     rename(geometry = x)
   
-  return(nhd_cats_sf)
+  return(nhd_cats_sf_out)
   
 }
 
@@ -123,21 +129,25 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
         filter(PRMS_segid == prms_line$subsegid) %>%
         mutate(hru_segment = prms_line$subsegid,
                hru_id = NA) %>%
-        select(PRMS_segid,hru_segment,hru_id,geometry) %>%
-        sf::st_transform(.,crs_out)
+        select(PRMS_segid,hru_segment,hru_id,geometry) 
     } else {
       cat <- prms_hrus %>%
         filter(hru_segment == prms_line$hru_segment) %>%
         mutate(PRMS_segid = prms_line$subsegid) %>%
         select(PRMS_segid,hru_segment,hru_id) %>%
-        rename(geometry = Shape) %>%
-        sf::st_transform(.,crs_out)
+        rename(geometry = Shape) 
     }
     
-    catchments_ls[[i]] <- cat
+    # Transform edited catchments to user-specified coordinate reference system
+    cat_out <- cat %>%
+      sf::st_transform(.,crs_out)
+    
+    # Append edited catchments
+    catchments_ls[[i]] <- cat_out
     
   }
   
+  # Bind edited catchments into a single data frame
   catchments_proc <- do.call("rbind",catchments_ls)
 
   return(catchments_proc)
