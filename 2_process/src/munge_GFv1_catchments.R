@@ -128,14 +128,15 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
       cat <- prms_splitsegs %>%
         filter(PRMS_segid == prms_line$subsegid) %>%
         mutate(hru_segment = prms_line$subsegid,
-               hru_id = NA) %>%
-        select(PRMS_segid,hru_segment,hru_id,geometry) 
+               hru_id = NA,
+               hru_area_m2 = as.numeric(sf::st_area(.))) %>%
+        select(PRMS_segid,hru_segment,hru_id,hru_area_m2)
     } else {
       cat <- prms_hrus %>%
         filter(hru_segment == prms_line$hru_segment) %>%
         mutate(PRMS_segid = prms_line$subsegid) %>%
-        select(PRMS_segid,hru_segment,hru_id) %>%
-        rename(geometry = Shape) 
+        select(PRMS_segid,hru_segment,hru_id,Shape_Area) %>%
+        rename(geometry = Shape, hru_area_m2 = Shape_Area) 
     }
     
     # Transform edited catchments to user-specified coordinate reference system
