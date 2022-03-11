@@ -29,7 +29,7 @@ write_sf <- function(data_sf, dsn, layer, driver, quiet, append){
   #' be used; see ??st_write for more details
   #' @param quiet logical, suppress info; see ??st_write for more details
   #' @param append logical, if FALSE, overwrite layer if it already exists; 
-  #' see ??st_writefor more details
+  #' see ??st_write for more details
   #'
   
   sf::st_write(data_sf, 
