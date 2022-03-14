@@ -38,7 +38,7 @@ p2_targets_list <- list(
   # https://github.com/USGS-R/delaware-model-prep
   tar_target(
     p2_GFv1_catchments_edited_sf,
-    munge_GFv1_catchments(p1_GFv1_reaches_sf,p1_GFv1_catchments_sf,p2_drb_comids_all_tribs,GFv1_segs_split,crs_out = 4326)
+    munge_GFv1_catchments(p1_GFv1_reaches_sf,p1_GFv1_catchments_sf,p2_drb_comids_all_tribs,GFv1_segs_split,crs_out = 5070)
   ),
   
   # Save processed GFv1 catchments as a geopackage
