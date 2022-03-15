@@ -33,7 +33,7 @@ find_intersecting_hru <- function(prms_line,prms_hrus){
 
 
 
-return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
+return_nhdv2_cat_shps <- function(prms_line,segs_w_comids,verbose = TRUE){
   #' 
   #' @description This function takes a data table of PRMS segment ID's and
   #' its contributing NHDv2 tributary catchments and returns those catchments
@@ -43,7 +43,18 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
   #' prms_line must contain variables subsegid and geometry
   #' @param segs_w_comids data frame containing the PRMS segment ids and the contributing COMID's
   #' segs_w_comids must contain variables PRMS_segid and COMID
+  #' @param verbose logical, defaults to TRUE; if FALSE do not include diagnostic messages
   #' 
+  #' @details sf > v1.0 causes issues with some NHD polygons and spherical coordinates, see
+  #' info on the change: https://r-spatial.org/r/2020/06/17/s2.html#sf-10-goodbye-flat-earth-welcome-s2-spherical-geometry
+  #' 
+  #' To avoid issues with NHD, we won't use the S2 engine for prepping NHD catchments. This
+  #' function toggles off the use of S2 and then resets the global options when the function is
+  #' complete.
+  #' 
+  
+  sf::sf_use_s2(FALSE)
+  on.exit(sf::sf_use_s2(TRUE))
   
   # Subset segs_w_comids to only include the PRMS segment of interest
   nhd_cats <- segs_w_comids %>%
@@ -52,8 +63,10 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
   # Use nhdplusTools to retrieve the catchment polygons for COMIDs of interest
   nhd_cats_sf <- nhdplusTools::get_nhdplus(comid = c(nhd_cats$COMID),realization = "catchment",t_srs = 5070) 
   
-  message(sprintf("Gathering NHDv2 catchments to create HRUs for subsegid %s; %s COMIDs expected and %s COMIDs returned",
-                  unique(prms_line$subsegid),length(nhd_cats$COMID),length(nhd_cats_sf$featureid)))
+  if(verbose == TRUE){
+    message(sprintf("Gathering NHDv2 catchments to create HRUs for subsegid %s; %s COMIDs expected and %s COMIDs returned",
+                    unique(prms_line$subsegid),length(nhd_cats$COMID),length(nhd_cats_sf$featureid)))
+  }
   
   # Format the catchment polygons
   nhd_cats_sf_out <- nhd_cats_sf %>%
@@ -63,14 +76,14 @@ return_nhdv2_cat_shps <- function(prms_line,segs_w_comids){
     sf::st_as_sf() %>%
     mutate(PRMS_segid = unique(prms_line$subsegid)) %>%
     rename(geometry = x)
-  
+
   return(nhd_cats_sf_out)
   
 }
 
 
 
-munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,crs_out = 4326){
+munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,crs_out = 4326,verbose = TRUE){
   #' 
   #' @description This function munges the PRMS HRU's (~ the PRMS catchments) so that every
   #' PRMS segment in the Delaware River Basin has at least one corresponding HRU and so that 
@@ -85,6 +98,7 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
   #' @param segs_split character vector indicating the PRMS_segid of the segments that were split in 
   #' the delaware-model-prep pipeline
   #' @param crs_out numeric EPSG code indicating desired crs. Defaults to EPSG: 4326, WGS84.
+  #' @param verbose logical, defaults to TRUE; if FALSE do not include diagnostic messages
   #
   
   # 1. Fill PRMS lines data frame so that every segment has a value for the attribute
@@ -109,7 +123,7 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
     # Transform PRMS segments into a list with a data frame for each segment
     split(.,.$subsegid) %>%
     # For each segment requiring special handling, return the polygon that represents the catchment area
-    lapply(.,return_nhdv2_cat_shps, segs_w_comids = segs_w_comids) %>%
+    lapply(.,return_nhdv2_cat_shps, segs_w_comids = segs_w_comids, verbose = verbose) %>%
     # Reformat list into a data frame with one row per PRMS segment
     bind_rows()
   
@@ -118,7 +132,7 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
   
   # Fill empty list with appropriate catchments
   for(i in seq_along(prms_hrus_filled$subsegid)){
-    
+
     prms_line <- prms_hrus_filled[i,]
     
     # If PRMS segment is one of the segments that require special handling, 
@@ -141,7 +155,7 @@ munge_GFv1_catchments <- function(prms_lines,prms_hrus,segs_w_comids,segs_split,
     
     # Transform edited catchments to user-specified coordinate reference system
     cat_out <- cat %>%
-      sf::st_transform(.,crs_out)
+      sf::st_transform(.,crs_out) 
     
     # Append edited catchments
     catchments_ls[[i]] <- cat_out
