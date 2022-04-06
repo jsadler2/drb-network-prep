@@ -41,8 +41,9 @@ p1_targets_list <- list(
   tar_target(
     p1_GFv1_catchments_sf,
     {
-      sf::st_read(dsn = p1_GFv1_catchments_shp,layer="nhru", quiet=TRUE) %>%
-        filter(hru_segment %in% p1_GFv1_reaches_sf$subsegseg) %>%
+      sf::st_read(dsn = p1_GFv1_catchments_shp,layer="nhruNationalIdentifier", quiet=TRUE) %>%
+        filter(hru_segment %in% p1_GFv1_reaches_sf$subsegseg,
+               region == "02") %>%
         suppressWarnings() %>%
         # fix geometry issues by defining a zero-width buffer around the polylines
         sf::st_buffer(.,0)
